@@ -3,6 +3,9 @@ _gsdata_
 bin
 out
 
+*.asc
+*.bpg
+
 
 #ignore thumbnails created by windows
 Thumbs.db
