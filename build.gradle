@@ -23,9 +23,11 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
 
     compile group: 'ch.qos.logback', name: 'logback-classic', version:'1.2.3'
-    
-    // // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk16
-    // compile group: 'org.bouncycastle', name: 'bcprov-jdk16', version: '1.46'
+
+    // https://mvnrepository.com/artifact/com.beust/jcommander
+    compile group: 'com.beust', name: 'jcommander', version: '1.72'
+
+
     // https://mvnrepository.com/artifact/org.bouncycastle/bcpg-jdk15on
     compile group: 'org.bouncycastle', name: 'bcpg-jdk15on', version: '1.60'
     // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk15on
@@ -67,5 +69,47 @@ task bcKeyGenApp(type: CreateStartScripts) {
 applicationDistribution.into("bin") {
     duplicatesStrategy= DuplicatesStrategy.EXCLUDE
     from(bcKeyGenApp)
+    fileMode = 0755
+}
+
+//SignedFileProcessor
+//task bcSignFile2App(type: CreateStartScripts) {
+//    applicationName = 'bcSignFile2'
+//    mainClassName = "com.beet.encrypt.SignedFileProcessor"
+//    classpath = startScripts.classpath
+//    outputDir = startScripts.outputDir
+//}
+//
+//applicationDistribution.into("bin") {
+//    duplicatesStrategy= DuplicatesStrategy.EXCLUDE
+//    from(bcSignFile2App)
+//    fileMode = 0755
+//}
+
+//ClearSignedProcessor
+task bcSignCleareApp(type: CreateStartScripts) {
+    applicationName = 'bcSignClear'
+    mainClassName = "com.beet.encrypt.ClearSignedProcessor"
+    classpath = startScripts.classpath
+    outputDir = startScripts.outputDir
+}
+
+applicationDistribution.into("bin") {
+    duplicatesStrategy= DuplicatesStrategy.EXCLUDE
+    from(bcSignCleareApp)
+    fileMode = 0755
+}
+
+//DetachedSignatureProcessor
+task bcSignDetachedApp(type: CreateStartScripts) {
+    applicationName = 'bcSignDetached'
+    mainClassName = "com.beet.encrypt.DetachedSignatureProcessor"
+    classpath = startScripts.classpath
+    outputDir = startScripts.outputDir
+}
+
+applicationDistribution.into("bin") {
+    duplicatesStrategy= DuplicatesStrategy.EXCLUDE
+    from(bcSignDetachedApp)
     fileMode = 0755
 }
