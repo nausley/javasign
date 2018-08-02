@@ -1,32 +1,28 @@
 import encrypt.KeyGeneration;
 import encrypt.SignData;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import java.io.*;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.Security;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMKeyPair;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import java.util.Properties;
 
 public class Program {
-    public static void main(String[] args)  {
+    public static void main(String[] args) throws IOException {
 
 //        ListSecurityProviders();
 //
 //        if (true) { return; }
+
+
+        Properties properties = new Properties();
+        FileInputStream pFile = new FileInputStream("test.properties.asc");
+        properties.load(pFile);
+
+        String name = properties.getProperty("name");
+        String debug = properties.getProperty("debug");
+
 
 
         bcKeyGen();

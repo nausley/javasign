@@ -3,7 +3,7 @@ _gsdata_
 
 *.asc
 *.bpg
-
+test.properties*
 
 #Ignore files build by Visual Studio
 *.obj
