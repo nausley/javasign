@@ -1,42 +1,21 @@
 package com.beet.encrypt;
 
-import com.beet.commands.CommandSign;
-import com.beet.commands.CommandVerify;
-import com.beet.commands.MainArgs;
-import com.beust.jcommander.JCommander;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.GeneralSecurityException;
-import java.security.Security;
-
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openpgp.PGPCompressedData;
-import org.bouncycastle.openpgp.PGPException;
-import org.bouncycastle.openpgp.PGPPrivateKey;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPPublicKeyRingCollection;
-import org.bouncycastle.openpgp.PGPSecretKey;
-import org.bouncycastle.openpgp.PGPSignature;
-import org.bouncycastle.openpgp.PGPSignatureGenerator;
-import org.bouncycastle.openpgp.PGPSignatureList;
-import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 
-public class DetachedSignatureProcessor {
-    private static final String cmdName = "bcSignDetached";
+import java.io.*;
+import java.security.GeneralSecurityException;
 
-    private static void verifySignature(
+public class DetachedSignatureProcessor {
+//    private static final String cmdName = "bcSignDetached";
+
+    public void verifySignature(
             String fileName,
             String inputFileName,
             String keyFileName)
@@ -98,7 +77,7 @@ public class DetachedSignatureProcessor {
         }
     }
 
-    private static void createSignature(
+    public void createSignature(
             String inputFileName,
             String keyFileName,
             String outputFileName,
@@ -161,44 +140,44 @@ public class DetachedSignatureProcessor {
      * It also expects that a single pass phrase
      * will have been used.
      */
-    public static void main(String[] args)
-            throws GeneralSecurityException, IOException, PGPException {
-        Security.addProvider(new BouncyCastleProvider());
-
-        MainArgs mainArgs = new MainArgs();
-        CommandSign sign = new CommandSign();
-        CommandVerify verify = new CommandVerify();
-        JCommander jc = JCommander.newBuilder()
-                .addObject(mainArgs)
-                .addCommand("sign", sign)
-                .addCommand("verify", verify)
-                .args(args)
-                .programName(cmdName)
-                .build();
-
-        if (mainArgs.help | jc.getParsedCommand() == null) {
-            jc.usage();
-            System.exit(100);
-        }
-
-        InputStream keyIn = null;
-        switch (jc.getParsedCommand()) {
-            case "sign":
-                System.out.println("Signing Command");
-                //-s [-a] fileName secretKey passPhrase
-                if (sign.ASCOutput) {
-                    createSignature(sign.FileName, sign.SecretFile, sign.FileName + ".asc", sign.PassPhrase.toCharArray(), true);
-                } else {
-                    createSignature(sign.FileName, sign.SecretFile, sign.FileName + ".bpg", sign.PassPhrase.toCharArray(), false);
-                }
-                break;
-
-            case "verify":
-                System.out.println("Signature Validation Command");
-                //-v  fileName signatureFile publicKeyFile
-                verifySignature(verify.FileName, verify.SignatureFile, verify.PublicKey);
-                break;
-
-        }
-    }
+//    public static void main(String[] args)
+//            throws GeneralSecurityException, IOException, PGPException {
+//        Security.addProvider(new BouncyCastleProvider());
+//
+//        MainArgs mainArgs = new MainArgs();
+//        CommandSign sign = new CommandSign();
+//        CommandVerify verify = new CommandVerify();
+//        JCommander jc = JCommander.newBuilder()
+//                .addObject(mainArgs)
+//                .addCommand("sign", sign)
+//                .addCommand("verify", verify)
+//                .args(args)
+//                .programName(cmdName)
+//                .build();
+//
+//        if (mainArgs.help | jc.getParsedCommand() == null) {
+//            jc.usage();
+//            System.exit(100);
+//        }
+//
+//        InputStream keyIn = null;
+//        switch (jc.getParsedCommand()) {
+//            case "sign":
+//                System.out.println("Signing Command");
+//                //-s [-a] fileName secretKey passPhrase
+//                if (sign.ASCOutput) {
+//                    createSignature(sign.FileName, sign.SecretFile, sign.FileName + ".asc", sign.PassPhrase.toCharArray(), true);
+//                } else {
+//                    createSignature(sign.FileName, sign.SecretFile, sign.FileName + ".bpg", sign.PassPhrase.toCharArray(), false);
+//                }
+//                break;
+//
+//            case "verify":
+//                System.out.println("Signature Validation Command");
+//                //-v  fileName signatureFile publicKeyFile
+//                verifySignature(verify.FileName, verify.SignatureFile, verify.PublicKey);
+//                break;
+//
+//        }
+//    }
 }

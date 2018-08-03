@@ -72,19 +72,33 @@ applicationDistribution.into("bin") {
     fileMode = 0755
 }
 
-//SignedFileProcessor
-//task bcSignFile2App(type: CreateStartScripts) {
-//    applicationName = 'bcSignFile2'
-//    mainClassName = "com.beet.encrypt.SignedFileProcessor"
-//    classpath = startScripts.classpath
-//    outputDir = startScripts.outputDir
-//}
-//
-//applicationDistribution.into("bin") {
-//    duplicatesStrategy= DuplicatesStrategy.EXCLUDE
-//    from(bcSignFile2App)
-//    fileMode = 0755
-//}
+//com.beet.encrypt.Sign
+task bcSignApp(type: CreateStartScripts) {
+    applicationName = 'bcSign'
+    mainClassName = "com.beet.encrypt.Sign"
+    classpath = startScripts.classpath
+    outputDir = startScripts.outputDir
+}
+
+applicationDistribution.into("bin") {
+    duplicatesStrategy= DuplicatesStrategy.EXCLUDE
+    from(bcSignApp)
+    fileMode = 0755
+}
+
+//com.beet.encrypt.Validate
+task bcValidateApp(type: CreateStartScripts) {
+    applicationName = 'bcValidate'
+    mainClassName = "com.beet.encrypt.Validate"
+    classpath = startScripts.classpath
+    outputDir = startScripts.outputDir
+}
+
+applicationDistribution.into("bin") {
+    duplicatesStrategy= DuplicatesStrategy.EXCLUDE
+    from(bcValidateApp)
+    fileMode = 0755
+}
 
 //ClearSignedProcessor
 task bcSignCleareApp(type: CreateStartScripts) {
