@@ -1,40 +1,45 @@
 package com.beet.encrypt;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchProviderException;
-import java.security.Security;
-import java.security.SignatureException;
-import java.util.Date;
-
-import org.apache.commons.cli.*;
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openpgp.PGPEncryptedData;
-import org.bouncycastle.openpgp.PGPException;
-import org.bouncycastle.openpgp.PGPKeyPair;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPSecretKey;
-import org.bouncycastle.openpgp.PGPSignature;
+import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentSignerBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPDigestCalculatorProviderBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPKeyPair;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyEncryptorBuilder;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.Security;
+import java.util.Date;
+
 
 // bcKeyGen
 public class KeyGenerator {
     private static final String cmdName = "bcKeyGen";
 
-    private static void PrintHelp(Options options) {
-        HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp(cmdName, options, true);
+    private static class CommonOptions {
+        @Parameter(names = "-a", description = "Armored Output (asc)", order = 0)
+        public boolean ArmoredOutput = false;
+
+        @Parameter(names = {"-i", "--identity"}, description = "Key Identity Name", required = true, order = 1)
+        public String Identity;
+
+        @Parameter(names = {"-p", "--passphrase"}, required = true, description = "Passphrase String for Private Key", order = 2)
+        public String PassPhrase;
+
+        @Parameter(names = {"-o", "--output"}, description = "Output File Name",order = 3)
+        public String OutputFileName = "";
+
+        @Parameter(names = {"--help", "-h"}, help = true, description = "The help you are reading")
+        public boolean help = false;
     }
 
     private static void exportKeyPair(
@@ -44,7 +49,7 @@ public class KeyGenerator {
             String identity,
             char[] passPhrase,
             boolean armor)
-            throws IOException, InvalidKeyException, NoSuchProviderException, SignatureException, PGPException {
+            throws IOException, PGPException {
         if (armor) {
             secretOut = new ArmoredOutputStream(secretOut);
         }
@@ -69,79 +74,51 @@ public class KeyGenerator {
     }
 
     public static void main(String[] args) throws Exception {
-        CommandLineParser parser = new DefaultParser();
-        Options options = new Options();
+        CommonOptions commonOptions = new CommonOptions();
+        JCommander jc = JCommander.newBuilder()
+                .addObject(commonOptions)
+                .args(args)
+                .programName(cmdName)
+                .build();
 
-        options.addOption(Option.builder("a").desc("Armored Output (asc)").build());
-        options.addOption(Option.builder("i")
-                .longOpt("identity").hasArg().desc("Key Identity Name").required().build());
-        options.addOption(Option.builder("p")
-                .longOpt("passphrase").hasArg().desc("Passphrase String Private Key").required().build());
-        options.addOption(Option.builder("o")
-                .longOpt("out").hasArg().desc("Output File Name").build());
-        options.addOption(Option.builder().longOpt("help").build());
-
-        CommandLine cmd = null;
-        try {
-            cmd = parser.parse(options, args);
-        } catch (ParseException e) {
-            PrintHelp(options);
-            System.exit(100);
-        }
-
-        if (cmd.hasOption("help")) {
-            PrintHelp(options);
+        if (commonOptions.help) {
+            jc.usage();
             System.exit(0);
         }
+
+        if (commonOptions.ArmoredOutput) System.out.println("ASC Output");
 
         Security.addProvider(new BouncyCastleProvider());
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA", "BC");
 
-        kpg.initialize(1024);
+        kpg.initialize(2048);
 
         KeyPair kp = kpg.generateKeyPair();
 
         String secretFile = "secret";
         String publicFile = "pub";
-        if (cmd.hasOption("out")) {
-            String outputName = cmd.getOptionValue("out");
+        if (!commonOptions.OutputFileName.isEmpty()) {
+            String outputName = commonOptions.OutputFileName;
             secretFile = outputName + "_secret";
             publicFile = outputName + "_pub";
         }
 
-        if (cmd.hasOption("a")) {
+        System.out.println("secretFile: " + secretFile );
+        System.out.println("publicFile: " + publicFile );
+
+        if (commonOptions.ArmoredOutput) {
             FileOutputStream out1 = new FileOutputStream(secretFile + ".asc");
             FileOutputStream out2 = new FileOutputStream(publicFile + ".asc");
 
-            exportKeyPair(out1, out2, kp, cmd.getOptionValue("i"), cmd.getOptionValue("p").toCharArray(), true);
+            exportKeyPair(out1, out2, kp, commonOptions.Identity, commonOptions.PassPhrase.toCharArray(), true);
         } else {
             FileOutputStream out1 = new FileOutputStream(secretFile + ".bpg");
             FileOutputStream out2 = new FileOutputStream(publicFile + ".bpg");
 
-            exportKeyPair(out1, out2, kp, cmd.getOptionValue("i"), cmd.getOptionValue("p").toCharArray(), false);
+            exportKeyPair(out1, out2, kp, commonOptions.Identity, commonOptions.PassPhrase.toCharArray(), false);
         }
 
-//        if (args.length < 2) {
-//            System.out.println("RSAKeyPairGenerator [-a] identity passPhrase");
-//            System.exit(0);
-//        }
 
-//        if (args[0].equals("-a")) {
-//            if (args.length < 3) {
-//                System.out.println("RSAKeyPairGenerator [-a] identity passPhrase");
-//                System.exit(0);
-//            }
-//
-//            FileOutputStream out1 = new FileOutputStream("secret.asc");
-//            FileOutputStream out2 = new FileOutputStream("pub.asc");
-//
-//            exportKeyPair(out1, out2, kp, args[1], args[2].toCharArray(), true);
-//        } else {
-//            FileOutputStream out1 = new FileOutputStream("secret.bpg");
-//            FileOutputStream out2 = new FileOutputStream("pub.bpg");
-//
-//            exportKeyPair(out1, out2, kp, args[0], args[1].toCharArray(), false);
-//        }
     }
 
 

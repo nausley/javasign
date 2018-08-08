@@ -5,15 +5,6 @@ import com.beust.jcommander.Parameters;
 
 @Parameters(commandDescription = "Sign File")
 public class CommandSign {
-    //usage: SignedFileProcessor -v|-s [-a] file keyfile [passPhrase]");
-    /*
-            options.addOption(Option.builder("a").desc("Armored Output (asc)").build());
-        options.addOption(Option.builder("i")
-                .longOpt("identity").hasArg().desc("Key Identity Name").required().build());
-        options.addOption(Option.builder("p")
-                .longOpt("passphrase").hasArg().desc("Passphrase String Private Key").required().build());
-        options.addOption(Option.builder("o")
-     */
     @Parameter(names = "-a", description = "Armored Output (asc)")
     public boolean ASCOutput = false;
 

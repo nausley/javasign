@@ -1,7 +1,5 @@
 package com.beet.encrypt;
 
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -17,11 +15,15 @@ import java.security.Security;
 import java.util.Iterator;
 
 public class SignedFileProcessor {
-    private static final String cmdName = "bcSignFile2";
+//    private static final String cmdName = "bcSignFile2";
+//
+//    private static void PrintHelp(Options options) {
+//        HelpFormatter formatter = new HelpFormatter();
+//        formatter.printHelp(cmdName, options, true);
+//    }
 
-    private static void PrintHelp(Options options) {
-        HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp(cmdName, options, true);
+    public SignedFileProcessor() {
+        Security.addProvider(new BouncyCastleProvider());
     }
 
     /*
@@ -129,52 +131,52 @@ public class SignedFileProcessor {
             out.close();
         }
     }
-
-    public static void main(String[] args) throws Exception {
-        Security.addProvider(new BouncyCastleProvider());
-
-//        MainArgs mainArgs = new MainArgs();
-//        CommandSign sign = new CommandSign();
-//        CommandVerify verify = new CommandVerify();
-//        JCommander jc = JCommander.newBuilder()
-//                .addObject(mainArgs)
-//                .addCommand("sign",sign)
-//                .addCommand("verify", verify)
-//                .args(args)
-//                .programName(cmdName)
-//                .build();
 //
-//        if (mainArgs.help | jc.getParsedCommand() == null) {
-//            jc.usage();
-//            System.exit(100);
-//        }
+//    public static void main(String[] args) throws Exception {
+//        Security.addProvider(new BouncyCastleProvider());
 //
-//        FileInputStream keyIn = null;
-//        switch (jc.getParsedCommand()) {
-//            case "sign":
-//                System.out.println("Signing Command");
-//                keyIn = new FileInputStream(sign.KeyFile);
-//                if (sign.ASCOutput) {
-//                    FileOutputStream out = new FileOutputStream(sign.FileToSign + ".asc");
-//                    signFile(sign.FileToSign, keyIn, out, sign.PassPhrase.toCharArray(), true);
-//                } else {
-//                    FileOutputStream out = new FileOutputStream(sign.FileToSign + ".bpg");
-//                    signFile(sign.FileToSign, keyIn, out, sign.PassPhrase.toCharArray(), false);
-//                }
-//                break;
+////        MainArgs mainArgs = new MainArgs();
+////        CommandSign sign = new CommandSign();
+////        CommandVerify verify = new CommandVerify();
+////        JCommander jc = JCommander.newBuilder()
+////                .addObject(mainArgs)
+////                .addCommand("sign",sign)
+////                .addCommand("verify", verify)
+////                .args(args)
+////                .programName(cmdName)
+////                .build();
+////
+////        if (mainArgs.help | jc.getParsedCommand() == null) {
+////            jc.usage();
+////            System.exit(100);
+////        }
+////
+////        FileInputStream keyIn = null;
+////        switch (jc.getParsedCommand()) {
+////            case "sign":
+////                System.out.println("Signing Command");
+////                keyIn = new FileInputStream(sign.KeyFile);
+////                if (sign.ASCOutput) {
+////                    FileOutputStream out = new FileOutputStream(sign.FileToSign + ".asc");
+////                    signFile(sign.FileToSign, keyIn, out, sign.PassPhrase.toCharArray(), true);
+////                } else {
+////                    FileOutputStream out = new FileOutputStream(sign.FileToSign + ".bpg");
+////                    signFile(sign.FileToSign, keyIn, out, sign.PassPhrase.toCharArray(), false);
+////                }
+////                break;
+////
+////            case "verify":
+////                System.out.println("Signature Validation Command");
+////                FileInputStream in = new FileInputStream(verify.FileIn);
+////                keyIn = new FileInputStream(verify.KeyFile);
+////
+////                verifyFile(in, keyIn);
+////                break;
+////
+////        }
 //
-//            case "verify":
-//                System.out.println("Signature Validation Command");
-//                FileInputStream in = new FileInputStream(verify.FileIn);
-//                keyIn = new FileInputStream(verify.KeyFile);
 //
-//                verifyFile(in, keyIn);
-//                break;
 //
-//        }
-
-
-
-
-    }
+//
+//    }
 }

@@ -100,30 +100,30 @@ applicationDistribution.into("bin") {
     fileMode = 0755
 }
 
-//ClearSignedProcessor
-task bcSignCleareApp(type: CreateStartScripts) {
-    applicationName = 'bcSignClear'
-    mainClassName = "com.beet.encrypt.ClearSignedProcessor"
-    classpath = startScripts.classpath
-    outputDir = startScripts.outputDir
-}
-
-applicationDistribution.into("bin") {
-    duplicatesStrategy= DuplicatesStrategy.EXCLUDE
-    from(bcSignCleareApp)
-    fileMode = 0755
-}
-
-//DetachedSignatureProcessor
-task bcSignDetachedApp(type: CreateStartScripts) {
-    applicationName = 'bcSignDetached'
-    mainClassName = "com.beet.encrypt.DetachedSignatureProcessor"
-    classpath = startScripts.classpath
-    outputDir = startScripts.outputDir
-}
-
-applicationDistribution.into("bin") {
-    duplicatesStrategy= DuplicatesStrategy.EXCLUDE
-    from(bcSignDetachedApp)
-    fileMode = 0755
-}
+////ClearSignedProcessor
+//task bcSignCleareApp(type: CreateStartScripts) {
+//    applicationName = 'bcSignClear'
+//    mainClassName = "com.beet.encrypt.ClearSignedProcessor"
+//    classpath = startScripts.classpath
+//    outputDir = startScripts.outputDir
+//}
+//
+//applicationDistribution.into("bin") {
+//    duplicatesStrategy= DuplicatesStrategy.EXCLUDE
+//    from(bcSignCleareApp)
+//    fileMode = 0755
+//}
+//
+////DetachedSignatureProcessor
+//task bcSignDetachedApp(type: CreateStartScripts) {
+//    applicationName = 'bcSignDetached'
+//    mainClassName = "com.beet.encrypt.DetachedSignatureProcessor"
+//    classpath = startScripts.classpath
+//    outputDir = startScripts.outputDir
+//}
+//
+//applicationDistribution.into("bin") {
+//    duplicatesStrategy= DuplicatesStrategy.EXCLUDE
+//    from(bcSignDetachedApp)
+//    fileMode = 0755
+//}

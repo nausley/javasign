@@ -2,6 +2,7 @@ package com.beet.encrypt;
 
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
@@ -10,33 +11,37 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProv
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyDecryptorBuilder;
 
 import java.io.*;
-import java.security.GeneralSecurityException;
+import java.security.Security;
 
 public class DetachedSignatureProcessor {
-//    private static final String cmdName = "bcSignDetached";
 
-    public void verifySignature(
+    public DetachedSignatureProcessor() {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
+    public boolean verifySignature(
             String fileName,
             String inputFileName,
             String keyFileName)
-            throws GeneralSecurityException, IOException, PGPException {
+            throws IOException, PGPException {
         InputStream in = new BufferedInputStream(new FileInputStream(inputFileName));
         InputStream keyIn = new BufferedInputStream(new FileInputStream(keyFileName));
 
-        verifySignature(fileName, in, keyIn);
+        boolean result = verifySignature(fileName, in, keyIn);
 
         keyIn.close();
         in.close();
+        return result;
     }
 
     /*
      * verify the signature in in against the file fileName.
      */
-    private static void verifySignature(
+    private static boolean verifySignature(
             String fileName,
             InputStream in,
             InputStream keyIn)
-            throws GeneralSecurityException, IOException, PGPException {
+            throws IOException, PGPException {
         in = PGPUtil.getDecoderStream(in);
 
         JcaPGPObjectFactory pgpFact = new JcaPGPObjectFactory(in);
@@ -53,7 +58,8 @@ public class DetachedSignatureProcessor {
             p3 = (PGPSignatureList) o;
         }
 
-        PGPPublicKeyRingCollection pgpPubRingCollection = new PGPPublicKeyRingCollection(PGPUtil.getDecoderStream(keyIn), new JcaKeyFingerprintCalculator());
+        PGPPublicKeyRingCollection pgpPubRingCollection = new PGPPublicKeyRingCollection(PGPUtil.getDecoderStream(keyIn),
+                new JcaKeyFingerprintCalculator());
 
 
         InputStream dIn = new BufferedInputStream(new FileInputStream(fileName));
@@ -71,9 +77,9 @@ public class DetachedSignatureProcessor {
         dIn.close();
 
         if (sig.verify()) {
-            System.out.println("signature verified.");
+            return true;
         } else {
-            System.out.println("signature verification failed.");
+            return false;
         }
     }
 
@@ -81,13 +87,13 @@ public class DetachedSignatureProcessor {
             String inputFileName,
             String keyFileName,
             String outputFileName,
-            char[] pass,
+            char[] pass, String digestMode,
             boolean armor)
-            throws GeneralSecurityException, IOException, PGPException {
+            throws IOException, PGPException {
         InputStream keyIn = new BufferedInputStream(new FileInputStream(keyFileName));
         OutputStream out = new BufferedOutputStream(new FileOutputStream(outputFileName));
 
-        createSignature(inputFileName, keyIn, out, pass, armor);
+        createSignature(inputFileName, keyIn, out, pass, digestMode, armor);
 
         out.close();
         keyIn.close();
@@ -97,21 +103,43 @@ public class DetachedSignatureProcessor {
             String fileName,
             InputStream keyIn,
             OutputStream out,
-            char[] pass,
+            char[] pass, String digestMode,
             boolean armor)
-            throws GeneralSecurityException, IOException, PGPException {
+            throws IOException, PGPException {
         if (armor) {
             out = new ArmoredOutputStream(out);
         }
 
         PGPSecretKey pgpSec = PGPUtils.readSecretKey(keyIn);
         PGPPrivateKey pgpPrivKey = pgpSec.extractPrivateKey(new JcePBESecretKeyDecryptorBuilder().setProvider("BC").build(pass));
-        PGPSignatureGenerator sGen = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(pgpSec.getPublicKey().getAlgorithm(), PGPUtil.SHA1).setProvider("BC"));
 
+        int digestCode = PGPUtil.SHA1;
+        //SHA1,SHA256,SHA384,SHA512,MD5,RIPEMD160
+        switch (digestMode.toUpperCase()) {
+            case "SHA1":
+                digestCode = PGPUtil.SHA1;
+                break;
+            case "SHA256":
+                digestCode = PGPUtil.SHA256;
+                break;
+            case "SHA384":
+                digestCode = PGPUtil.SHA384;
+                break;
+            case "SHA512":
+                digestCode = PGPUtil.SHA512;
+                break;
+            case "MD5":
+                digestCode = PGPUtil.MD5;
+                break;
+            case "RIPEMD160":
+                digestCode = PGPUtil.RIPEMD160;
+                break;
+        }
+
+        PGPSignatureGenerator sGen = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(pgpSec.getPublicKey().getAlgorithm(),
+                digestCode).setProvider("BC"));
         sGen.init(PGPSignature.BINARY_DOCUMENT, pgpPrivKey);
-
         BCPGOutputStream bOut = new BCPGOutputStream(out);
-
         InputStream fIn = new BufferedInputStream(new FileInputStream(fileName));
 
         int ch;
@@ -127,57 +155,4 @@ public class DetachedSignatureProcessor {
             out.close();
         }
     }
-
-    /**
-     * A simple utility class that creates seperate signatures for files and verifies them.
-     *
-     * To sign a file: DetachedSignatureProcessor -s [-a] fileName secretKey passPhrase.
-     * If -a is specified the output file will be "ascii-armored".
-     *
-     * To decrypt: DetachedSignatureProcessor -v  fileName signatureFile publicKeyFile.
-     *
-     * Note: this example will silently overwrite files.
-     * It also expects that a single pass phrase
-     * will have been used.
-     */
-//    public static void main(String[] args)
-//            throws GeneralSecurityException, IOException, PGPException {
-//        Security.addProvider(new BouncyCastleProvider());
-//
-//        MainArgs mainArgs = new MainArgs();
-//        CommandSign sign = new CommandSign();
-//        CommandVerify verify = new CommandVerify();
-//        JCommander jc = JCommander.newBuilder()
-//                .addObject(mainArgs)
-//                .addCommand("sign", sign)
-//                .addCommand("verify", verify)
-//                .args(args)
-//                .programName(cmdName)
-//                .build();
-//
-//        if (mainArgs.help | jc.getParsedCommand() == null) {
-//            jc.usage();
-//            System.exit(100);
-//        }
-//
-//        InputStream keyIn = null;
-//        switch (jc.getParsedCommand()) {
-//            case "sign":
-//                System.out.println("Signing Command");
-//                //-s [-a] fileName secretKey passPhrase
-//                if (sign.ASCOutput) {
-//                    createSignature(sign.FileName, sign.SecretFile, sign.FileName + ".asc", sign.PassPhrase.toCharArray(), true);
-//                } else {
-//                    createSignature(sign.FileName, sign.SecretFile, sign.FileName + ".bpg", sign.PassPhrase.toCharArray(), false);
-//                }
-//                break;
-//
-//            case "verify":
-//                System.out.println("Signature Validation Command");
-//                //-v  fileName signatureFile publicKeyFile
-//                verifySignature(verify.FileName, verify.SignatureFile, verify.PublicKey);
-//                break;
-//
-//        }
-//    }
 }

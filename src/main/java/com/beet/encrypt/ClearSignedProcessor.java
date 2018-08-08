@@ -1,9 +1,5 @@
 package com.beet.encrypt;
 
-import com.beet.commands.CommandSign;
-import com.beet.commands.CommandVerify;
-import com.beet.commands.MainArgs;
-import com.beust.jcommander.JCommander;
 import org.bouncycastle.bcpg.ArmoredInputStream;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
@@ -22,7 +18,12 @@ import java.security.SignatureException;
 import java.util.Iterator;
 
 public class ClearSignedProcessor {
-    private static final String cmdName = "bcSignClear";
+//    private static final String cmdName = "bcSignClear";
+
+    public ClearSignedProcessor() {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
 
     private static int readInputLine(ByteArrayOutputStream bOut, InputStream fIn)
             throws IOException {
@@ -79,7 +80,7 @@ public class ClearSignedProcessor {
     /*
      * verify a clear text signed file
      */
-    private static void verifyFile(
+    public static void verifyFile(
             InputStream in,
             InputStream keyIn,
             String resultName)
@@ -170,10 +171,11 @@ public class ClearSignedProcessor {
         return nlBytes;
     }
 
+
     /*
      * create a clear text signed file.
      */
-    private static void signFile(
+    public static void signFile(
             String fileName,
             InputStream keyIn,
             OutputStream out,
@@ -300,51 +302,51 @@ public class ClearSignedProcessor {
      *
      * To decrypt: ClearSignedFileProcessor -v fileName signatureFile publicKeyFile.
      */
-    public static void main(String[] args) throws Exception {
-        Security.addProvider(new BouncyCastleProvider());
-
-        MainArgs mainArgs = new MainArgs();
-        CommandSign sign = new CommandSign();
-        CommandVerify verify = new CommandVerify();
-        JCommander jc = JCommander.newBuilder()
-                .addObject(mainArgs)
-                .addCommand("sign", sign)
-                .addCommand("verify", verify)
-                .args(args)
-                .programName(cmdName)
-                .build();
-
-        if (mainArgs.help | jc.getParsedCommand() == null) {
-            jc.usage();
-            System.exit(100);
-        }
-
-        InputStream keyIn = null;
-        switch (jc.getParsedCommand()) {
-            case "sign":
-                System.out.println("Signing Command");
-                //-s fileName secretKey passPhrase
-                keyIn = PGPUtil.getDecoderStream(new FileInputStream(sign.SecretFile));
-                FileOutputStream   out = new FileOutputStream(sign.FileName + ".asc");
-                signFile(sign.FileName, keyIn, out, sign.PassPhrase.toCharArray(), sign.DigestMode);
-                break;
-
-            case "verify":
-                System.out.println("Signature Validation Command");
-                //-v fileName signatureFile publicKeyFile
-
-                if (verify.FileName.indexOf(".asc") < 0)
-                {
-                    System.err.println("file needs to end in \".asc\"");
-                    System.exit(1);
-                }
-                FileInputStream    in = new FileInputStream(verify.FileName);
-                keyIn = PGPUtil.getDecoderStream(new FileInputStream(verify.PublicKey));
-                verifyFile(in, keyIn, verify.FileName.substring(0, verify.FileName.length() - 4));
-                break;
-
-        }
-
-
-    }
+//    public static void main(String[] args) throws Exception {
+//        Security.addProvider(new BouncyCastleProvider());
+//
+//        MainArgs mainArgs = new MainArgs();
+//        CommandSign sign = new CommandSign();
+//        CommandVerify verify = new CommandVerify();
+//        JCommander jc = JCommander.newBuilder()
+//                .addObject(mainArgs)
+//                .addCommand("sign", sign)
+//                .addCommand("verify", verify)
+//                .args(args)
+//                .programName(cmdName)
+//                .build();
+//
+//        if (mainArgs.help | jc.getParsedCommand() == null) {
+//            jc.usage();
+//            System.exit(100);
+//        }
+//
+//        InputStream keyIn = null;
+//        switch (jc.getParsedCommand()) {
+//            case "sign":
+//                System.out.println("Signing Command");
+//                //-s fileName secretKey passPhrase
+//                keyIn = PGPUtil.getDecoderStream(new FileInputStream(sign.SecretFile));
+//                FileOutputStream   out = new FileOutputStream(sign.FileName + ".asc");
+//                signFile(sign.FileName, keyIn, out, sign.PassPhrase.toCharArray(), sign.DigestMode);
+//                break;
+//
+//            case "verify":
+//                System.out.println("Signature Validation Command");
+//                //-v fileName signatureFile publicKeyFile
+//
+//                if (verify.FileName.indexOf(".asc") < 0)
+//                {
+//                    System.err.println("file needs to end in \".asc\"");
+//                    System.exit(1);
+//                }
+//                FileInputStream    in = new FileInputStream(verify.FileName);
+//                keyIn = PGPUtil.getDecoderStream(new FileInputStream(verify.PublicKey));
+//                verifyFile(in, keyIn, verify.FileName.substring(0, verify.FileName.length() - 4));
+//                break;
+//
+//        }
+//
+//
+//    }
 }
